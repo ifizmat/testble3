@@ -15,54 +15,41 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.testble1.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private var btAdapter: BluetoothAdapter? = null
+    private lateinit var binding: ActivityMainBinding
+    private  lateinit var adapter: RcAdapter
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         Log.d("MyLog", "START: onCreate")
         init()
-        /*
-        val tvText : TextView = findViewById(R.id.tvText)
-        val btnStart: Button = findViewById(R.id.btnStart)
-
-        btnStart.setOnClickListener {
-            Log.d("MyLog", "CLICKED: Start")
-            tvText.text = "Start"
-        }
-        val btnStop: Button = findViewById(R.id.btnStop)
-        btnStop.setOnClickListener {
-            Log.d("MyLog", "CLICKED: Stop")
-            tvText.text = "Stop"
-        }
-
-         */
-    }
-    fun onClickStart(view: View) {
-        val tvText : TextView = findViewById(R.id.tvText)
-        Log.d("MyLog", "CLICKED: Start")
-        tvText.text = "Start"
-    }
-    fun onClickStop(view: View) {
-        val tvText : TextView = findViewById(R.id.tvText)
-        Log.d("MyLog", "CLICKED: Stop")
-        tvText.text = "Stop"
     }
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private fun init() {
         val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         btAdapter = btManager.adapter
+        adapter = RcAdapter()
+        binding.rcView.layoutManager = LinearLayoutManager(this)
+        binding.rcView.adapter = adapter
         getPairedDevices()
 
     }
 
     private fun getPairedDevices() {
         val pairedDevices: Set<BluetoothDevice>? = btAdapter?.bondedDevices
+        val tempList = ArrayList<ListItem>()
         pairedDevices?.forEach {
             Log.d("MyLog", "Name ${it.name}")
+            tempList.add(ListItem(it.name, it.address))
         }
+        adapter.submitList(tempList)
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.BLUETOOTH_CONNECT
